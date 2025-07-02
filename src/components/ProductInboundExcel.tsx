@@ -30,6 +30,7 @@ export default function ProductInboundExcel() {
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || "업로드 실패");
+        // 업로드 실패 시 처리
       }
 
       setUploadResult("모든 데이터가 성공적으로 등록되었습니다.");
