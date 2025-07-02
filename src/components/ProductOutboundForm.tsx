@@ -60,6 +60,7 @@ export default function ProductOutboundForm() {
 
   const removeScannedProduct = (index: number) => {
     setScannedProducts((prev) => prev.filter((_, i) => i !== index));
+    setQuantity(scannedProducts.length - 1);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
