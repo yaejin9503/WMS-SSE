@@ -5,22 +5,29 @@ import { supabase } from "@/lib/supabaseClient";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { product_id, quantity, customer } = body;
+    const { customer, items } = body;
 
-    const { data, error } = await supabase
-      .from("shipments")
-      .insert([{ product_id, quantity, customer }])
-      .single();
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    if (!customer || !items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ error: "필수 데이터 누락" }, { status: 400 });
     }
 
-    return NextResponse.json(data, { status: 200 });
+    const insertData = items.map((item: any) => ({
+      product_id: item.product_id,
+      quantity: item.quantity || 1,
+      customer,
+      shipment_date: new Date().toISOString().split("T")[0],
+    }));
+
+    const { data, error } = await supabase.from("shipments").insert(insertData);
+
+    if (error) {
+      console.error("Supabase insert error:", error.message);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, data });
   } catch (err: any) {
-    return NextResponse.json(
-      { error: err.message || "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error("API error:", err.message);
+    return NextResponse.json({ error: "서버 오류" }, { status: 500 });
   }
 }

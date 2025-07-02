@@ -2,34 +2,37 @@
 "use client";
 
 import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface ScannedProduct {
+  id: string;
+  barcode: string;
+  name: string;
+  arrival_date: string;
+  supplier: string;
+}
 
 export default function ProductOutboundForm() {
   const today = new Date().toISOString().split("T")[0];
 
-  const [customer, setCustomer] = useState("");
   const [barcode, setBarcode] = useState("");
+  // const [productName, setProductName] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [customer, setCustomer] = useState("");
   const [loading, setLoading] = useState(false);
+  const [scannedProducts, setScannedProducts] = useState<ScannedProduct[]>([]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const fetchProduct = async (barcode: string) => {
+    if (!barcode) return;
 
-    if (!customer) {
-      alert("고객사는 필수입니다.");
-      return;
-    }
-    if (!barcode) {
-      alert("바코드는 필수입니다.");
-      return;
-    }
-    if (quantity < 1) {
-      alert("수량은 1 이상이어야 합니다.");
+    // 중복 스캔 방지
+    const isAlreadyScanned = scannedProducts.some((p) => p.barcode === barcode);
+    if (isAlreadyScanned) {
+      alert("이미 스캔된 바코드입니다.");
       return;
     }
 
-    setLoading(true);
     try {
-      // 1️⃣ 제품 바코드로 제품 정보 조회
       const resProduct = await fetch(
         `/api/products/trace?barcode=${encodeURIComponent(barcode)}`
       );
@@ -39,30 +42,63 @@ export default function ProductOutboundForm() {
       }
       const productData = await resProduct.json();
 
-      if (!productData.id) {
-        throw new Error("해당 바코드의 제품이 존재하지 않습니다.");
-      }
+      setScannedProducts((prev) => [
+        ...prev,
+        {
+          id: productData.id,
+          barcode,
+          name: productData.name || "알 수 없음",
+          arrival_date: productData.arrival_date || "미지정",
+          supplier: productData.supplier || "미지정",
+        },
+      ]);
+      setQuantity(scannedProducts.length + 1); // 수량은 스캔된 제품 수로 설정
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
 
-      // 2️⃣ 출고 등록
-      const resShipment = await fetch("/api/shipments/register", {
+  const removeScannedProduct = (index: number) => {
+    setScannedProducts((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!customer) {
+      alert("고객사는 필수입니다.");
+      return;
+    }
+
+    if (scannedProducts.length === 0) {
+      alert("출고할 상품이 없습니다.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const payload = {
+        customer,
+        items: scannedProducts.map((p) => ({
+          product_id: p.id,
+          quantity: 1, // 각 스캔은 1개 단위
+        })),
+      };
+
+      const res = await fetch("/api/shipments/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          product_id: productData.id,
-          quantity,
-          customer,
-        }),
+        body: JSON.stringify(payload),
       });
 
-      if (!resShipment.ok) {
-        const err = await resShipment.json();
+      if (!res.ok) {
+        const err = await res.json();
         throw new Error(err.error || "출고 등록 실패");
       }
 
-      alert("출고 등록 성공!");
-      // 폼 초기화
+      alert("모든 출고 등록 성공!");
+      setScannedProducts([]);
       setCustomer("");
-      setBarcode("");
       setQuantity(1);
     } catch (err: any) {
       alert(`에러: ${err.message}`);
@@ -72,28 +108,43 @@ export default function ProductOutboundForm() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex flex-col md:flex-row items-start justify-center p-4 space-y-4 md:space-y-0 md:space-x-4">
       <div className="w-full max-w-md">
         <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">
           출고 등록
         </h1>
+
+        <input
+          type="text"
+          value={barcode}
+          onChange={(e) => setBarcode(e.target.value)}
+          placeholder="바코드를 스캔하세요."
+          className="w-full rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 mb-4"
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              fetchProduct(barcode);
+              setBarcode("");
+            }
+          }}
+        />
         <form
           onSubmit={handleSubmit}
           className="space-y-4 bg-white p-6 rounded-lg shadow-md"
         >
+          {/* <input
+            type="text"
+            value={productName}
+            onChange={(e) => setProductName(e.target.value)}
+            placeholder="제품명 *"
+            className="w-full rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          /> */}
+
           <input
             type="text"
             value={customer}
             onChange={(e) => setCustomer(e.target.value)}
             placeholder="고객사 *"
-            className="w-full rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-
-          <input
-            type="text"
-            value={barcode}
-            onChange={(e) => setBarcode(e.target.value)}
-            placeholder="제품명 또는 바코드 *"
             className="w-full rounded-full border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
 
@@ -123,6 +174,71 @@ export default function ProductOutboundForm() {
             {loading ? "등록 중..." : "출고 등록"}
           </button>
         </form>
+      </div>
+
+      <div className="flex-1 w-full max-w-2xl bg-white rounded-lg shadow-md p-4">
+        <h2 className="text-lg font-bold mb-2 text-gray-700">
+          스캔된 상품 목록
+        </h2>
+        <table className="w-full table-auto text-sm">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="py-2 px-2">바코드</th>
+              <th className="py-2 px-2">제품명</th>
+              <th className="py-2 px-2">입고일자</th>
+              <th className="py-2 px-2">구매거래처</th>
+              <th className="py-2 px-2">삭제</th>
+            </tr>
+          </thead>
+          <tbody>
+            <AnimatePresence>
+              {scannedProducts.map((item, index) => (
+                <motion.tr
+                  key={`${item.barcode}-${index}`}
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  transition={{ duration: 0.3 }}
+                  className="text-center"
+                >
+                  <td className="py-1 px-2">{item.barcode}</td>
+                  <td className="py-1 px-2">{item.name}</td>
+                  <td className="py-1 px-2">{item.arrival_date}</td>
+                  <td className="py-1 px-2">{item.supplier}</td>
+                  <td className="py-1 px-2">
+                    <button
+                      onClick={() => removeScannedProduct(index)}
+                      className="text-red-500 hover:text-red-700"
+                      aria-label="삭제"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-4 w-4 inline"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </td>
+                </motion.tr>
+              ))}
+            </AnimatePresence>
+            {scannedProducts.length === 0 && (
+              <tr>
+                <td colSpan={5} className="text-center text-gray-400 py-4">
+                  스캔된 상품이 없습니다.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );
