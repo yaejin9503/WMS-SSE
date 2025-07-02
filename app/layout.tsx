@@ -3,8 +3,8 @@ import "./globals.css";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "WMS-SSE 제품 관리 시스템",
-  description: "땅구리 전용 물류 시스템",
+  title: "WMS-SSE 물류 관리 시스템",
+  description: "땅구리 물류 관리 시스템",
 };
 
 export default function RootLayout({
@@ -22,7 +22,7 @@ export default function RootLayout({
             <div className="container mx-auto flex justify-between items-center">
               <Link href="/">
                 <h1 className="text-xl font-bold">
-                  📦 땅구리 제품 관리 시스템
+                  📦 땅구리 물류 관리 시스템
                 </h1>
               </Link>
               <nav className="space-x-4">
@@ -55,7 +55,7 @@ export default function RootLayout({
 
           {/* 푸터 */}
           <footer className="bg-gray-100 text-center p-2 text-sm text-gray-500">
-            © 2025 제품 관리 시스템 made by 예구
+            © 2025 물류 관리 시스템 made by 예구
           </footer>
         </div>
       </body>
