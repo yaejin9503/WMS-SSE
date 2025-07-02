@@ -76,7 +76,7 @@ export default function ProductInboundForm() {
         />
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white rounded-full py-2 font-semibold hover:bg-blue-600 transition"
+          className="w-full bg-blue-500 text-white cursor-pointer rounded-full py-2 font-semibold hover:bg-blue-600 transition"
         >
           등록
         </button>

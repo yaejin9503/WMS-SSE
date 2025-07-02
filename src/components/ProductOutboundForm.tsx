@@ -16,6 +16,7 @@ export default function ProductOutboundForm() {
   const today = new Date().toISOString().split("T")[0];
 
   const [barcode, setBarcode] = useState("");
+  const [outboundDate, setOutboundDate] = useState(today);
   // const [productName, setProductName] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [customer, setCustomer] = useState("");
@@ -80,6 +81,7 @@ export default function ProductOutboundForm() {
     try {
       const payload = {
         customer,
+        outboundDate,
         items: scannedProducts.map((p) => ({
           product_id: p.id,
           quantity: 1, // 각 스캔은 1개 단위
@@ -106,6 +108,11 @@ export default function ProductOutboundForm() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setOutboundDate(value);
   };
 
   return (
@@ -162,15 +169,15 @@ export default function ProductOutboundForm() {
 
           <input
             type="date"
-            value={today}
-            readOnly
-            className="w-full rounded-full border border-gray-300 px-4 py-2 bg-gray-100 text-gray-600 cursor-not-allowed"
+            value={outboundDate}
+            className="w-full rounded-full border border-gray-300 px-4 py-2 text-gray-600 focus:ring-blue-400"
+            onChange={handleChange}
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 text-white rounded-full py-2 font-semibold hover:bg-blue-600 transition disabled:opacity-50"
+            className="w-full bg-blue-500 text-white rounded-full cursor-pointer py-2 font-semibold hover:bg-blue-600 transition disabled:opacity-50"
           >
             {loading ? "등록 중..." : "출고 등록"}
           </button>

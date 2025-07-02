@@ -66,7 +66,7 @@ export default function ProductTraceForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 text-white rounded-full py-2 font-semibold hover:bg-blue-600 transition disabled:opacity-50"
+            className="w-full bg-blue-500 text-white rounded-full cursor-pointer py-2 font-semibold hover:bg-blue-600 transition disabled:opacity-50"
           >
             {loading ? "조회 중..." : "추적하기"}
           </button>

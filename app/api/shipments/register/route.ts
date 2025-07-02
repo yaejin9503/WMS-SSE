@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { customer, items } = body;
+    const { customer, items, outboundDate } = body;
 
     if (!customer || !items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "필수 데이터 누락" }, { status: 400 });
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       product_id: item.product_id,
       quantity: item.quantity || 1,
       customer,
-      shipment_date: new Date().toISOString().split("T")[0],
+      shipment_date: outboundDate,
     }));
 
     const { data, error } = await supabase.from("shipments").insert(insertData);

@@ -16,11 +16,13 @@ interface ProductItem {
 type SortKey = keyof ProductItem;
 
 export default function ProductListView() {
+  const [allChecked, setAllChecked] = useState(false);
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [showConfirmed, setShowConfirmed] = useState(true);
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortAsc, setSortAsc] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -72,30 +74,50 @@ export default function ProductListView() {
 
     const newConfirmed = !product.confirmed;
 
+    setProducts((prev) => {
+      const updated = prev.map((item) =>
+        item.barcode === barcode ? { ...item, confirmed: newConfirmed } : item
+      );
+
+      const allConfirmed = updated.every((p) => p.confirmed);
+      setAllChecked(allConfirmed);
+
+      return updated;
+    });
+  };
+
+  const handleBulkUpdate = async () => {
+    const updateItems = products
+      .filter((p) => p.confirmed) // 또는 원하는 조건
+      .map((p) => ({
+        barcode: p.barcode,
+        confirmed: true,
+      }));
+
+    if (updateItems.length === 0) {
+      alert("업데이트할 제품이 없습니다.");
+      return;
+    }
+
+    setConfirmLoading(true);
     try {
       const res = await fetch("/api/shipments/confirm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          barcode,
-          confirmed: newConfirmed,
-        }),
+        body: JSON.stringify({ items: updateItems }),
       });
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error || "출고 확정 변경 실패");
+        throw new Error(err.error || "출고 확정 업데이트 실패");
       }
 
-      setProducts((prev) =>
-        prev.map((item) =>
-          item.barcode === barcode ? { ...item, confirmed: newConfirmed } : item
-        )
-      );
-
-      alert(`출고 ${newConfirmed ? "확정" : "미확정"} 처리되었습니다.`);
+      alert("출고 확정 상태 업데이트 성공!");
+      fetchProducts();
     } catch (err: any) {
       alert(`에러: ${err.message}`);
+    } finally {
+      setConfirmLoading(false);
     }
   };
 
@@ -106,7 +128,7 @@ export default function ProductListView() {
           제품 리스트
         </h1>
 
-        <div className="flex justify-end mb-4 text-sm">
+        <div className="flex justify-center mb-4 text-sm">
           <button
             onClick={() => setShowConfirmed(true)}
             className={`px-3 py-1 rounded-l-lg ${
@@ -115,7 +137,7 @@ export default function ProductListView() {
                 : "bg-gray-100 text-gray-600"
             }`}
           >
-            출고 확정
+            출고 확정 리스트
           </button>
           <button
             onClick={() => setShowConfirmed(false)}
@@ -125,7 +147,16 @@ export default function ProductListView() {
                 : "bg-gray-100 text-gray-600"
             }`}
           >
-            출고 미확정
+            출고 미확정 리스트
+          </button>
+        </div>
+        <div className="flex justify-end mb-4">
+          <button
+            className="px-4 bg-blue-500 text-white rounded-sm py-1 text-sm cursor-pointer hover:bg-blue-600 transition disabled:opacity-50"
+            disabled={confirmLoading}
+            onClick={handleBulkUpdate}
+          >
+            {confirmLoading ? "출고 확정 중..." : "출고 확정"}
           </button>
         </div>
 
@@ -137,6 +168,7 @@ export default function ProductListView() {
               <thead className="bg-gray-100 text-gray-700 text-sm">
                 <tr>
                   {[
+                    { key: "first", label: "" },
                     { key: "name", label: "제품명" },
                     { key: "barcode", label: "바코드" },
                     { key: "arrivalDate", label: "입고 일자" },
@@ -150,8 +182,24 @@ export default function ProductListView() {
                       onClick={() => handleSort(col.key as SortKey)}
                     >
                       {col.label}{" "}
-                      {sortKey === col.key && (
+                      {col.key !== "first" && sortKey === col.key && (
                         <span>{sortAsc ? "▲" : "▼"}</span>
+                      )}
+                      {col.key === "first" && (
+                        <input
+                          type="checkbox"
+                          checked={allChecked}
+                          onChange={() => {
+                            setAllChecked(!allChecked);
+                            setProducts((prev) =>
+                              prev.map((item) => ({
+                                ...item,
+                                confirmed: !allChecked,
+                              }))
+                            );
+                          }}
+                          className="ml-2 cursor-pointer"
+                        />
                       )}
                     </th>
                   ))}
@@ -168,6 +216,15 @@ export default function ProductListView() {
                 ) : (
                   sortedProducts.map((item) => (
                     <tr key={item.barcode} className="border-b text-center">
+                      <td className="py-2 px-3">
+                        {" "}
+                        <input
+                          type="checkbox"
+                          checked={item.confirmed}
+                          onChange={() => handleChangeConfirmed(item.barcode)}
+                          className="ml-2 cursor-pointer"
+                        />
+                      </td>
                       <td className="py-2 px-3">{item.name}</td>
                       <td className="py-2 px-3">{item.barcode}</td>
                       <td className="py-2 px-3">{item.arrivalDate}</td>
@@ -182,13 +239,6 @@ export default function ProductListView() {
                         ) : (
                           <span className="text-red-500">미확정</span>
                         )}
-                        <input
-                          type="checkbox"
-                          checked={item.confirmed}
-                          onChange={() => handleChangeConfirmed(item.barcode)}
-                          readOnly
-                          className="ml-2 cursor-pointer"
-                        />
                       </td>
                     </tr>
                   ))
