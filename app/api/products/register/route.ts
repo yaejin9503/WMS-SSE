@@ -3,11 +3,11 @@ import { supabase } from "@/lib/supabaseClient";
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
-  const { name, barcode, manufacture_date, arrival_date, supplier } = body;
+  const { name, barcode, arrival_date, supplier } = body;
 
   const { data, error } = await supabase
     .from("products")
-    .insert([{ name, barcode, manufacture_date, arrival_date, supplier }])
+    .insert([{ name, barcode, arrival_date, supplier }])
     .single();
 
   if (error) {

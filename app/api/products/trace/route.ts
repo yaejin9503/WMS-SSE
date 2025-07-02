@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
     const { data, error } = await supabase
       .from("products")
-      .select("id, name, barcode, manufacture_date, arrival_date, supplier")
+      .select("id, name, barcode, arrival_date, supplier")
       .eq("barcode", barcode)
       .single();
 

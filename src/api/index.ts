@@ -1,7 +1,6 @@
 export async function clientRegisterProduct(product: {
   name: string;
   barcode: string;
-  manufacture_date: string;
   arrival_date: string;
   supplier: string;
 }) {

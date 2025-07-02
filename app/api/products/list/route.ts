@@ -19,7 +19,6 @@ export async function GET(req: NextRequest) {
     const { data, error } = await supabase.from("products").select(`
         name,
         barcode,
-        manufacture_date,
         arrival_date,
         supplier,
         shipments (
@@ -43,7 +42,6 @@ export async function GET(req: NextRequest) {
           ? {
               name: product.name,
               barcode: product.barcode,
-              manufactureDate: product.manufacture_date,
               arrivalDate: product.arrival_date,
               supplier: product.supplier,
               shipmentDate: matchedShipment.shipment_date,

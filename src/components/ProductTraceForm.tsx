@@ -5,7 +5,6 @@ import React, { useState } from "react";
 interface ProductTraceData {
   name: string;
   barcode: string;
-  manufacture_date: string;
   arrival_date: string;
   supplier: string;
   shipments: {
@@ -80,9 +79,6 @@ export default function ProductTraceForm() {
             </p>
             <p className="mb-1">
               <strong>바코드:</strong> {data.barcode}
-            </p>
-            <p className="mb-1">
-              <strong>생산 일자:</strong> {data.manufacture_date}
             </p>
             <p className="mb-1">
               <strong>입고 일자:</strong> {data.arrival_date}

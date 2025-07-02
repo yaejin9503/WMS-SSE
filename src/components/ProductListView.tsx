@@ -139,7 +139,6 @@ export default function ProductListView() {
                   {[
                     { key: "name", label: "제품명" },
                     { key: "barcode", label: "바코드" },
-                    { key: "manufactureDate", label: "생산 일자" },
                     { key: "arrivalDate", label: "입고 일자" },
                     { key: "supplier", label: "구매 거래처" },
                     { key: "shipmentDate", label: "출고 일자" },
@@ -171,7 +170,6 @@ export default function ProductListView() {
                     <tr key={item.barcode} className="border-b text-center">
                       <td className="py-2 px-3">{item.name}</td>
                       <td className="py-2 px-3">{item.barcode}</td>
-                      <td className="py-2 px-3">{item.manufactureDate}</td>
                       <td className="py-2 px-3">{item.arrivalDate}</td>
                       <td className="py-2 px-3">{item.supplier}</td>
                       <td className="py-2 px-3">
