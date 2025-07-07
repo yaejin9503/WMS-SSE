@@ -8,7 +8,6 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isConfirmed, setIsConfirmed] = useState(false);
   const router = useRouter();
 
   const supabase = createClientComponentClient();
@@ -22,8 +21,7 @@ export default function LoginPage() {
     if (error) {
       alert(`로그인 실패: ${error.message}`);
     } else {
-      setIsConfirmed(true);
-      router.replace("/");
+      window.location.href = "/";
     }
   };
   return (
