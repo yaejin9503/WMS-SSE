@@ -1,5 +1,5 @@
-import ProductOutboundForm from "@/components/ProductOutboundForm";
+import ProduceOutbound from "@/components/ProduceOutbound";
 
 export default function outboundPage() {
-  return <ProductOutboundForm />;
+  return <ProduceOutbound />;
 }

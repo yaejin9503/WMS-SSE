@@ -1,5 +1,5 @@
 import ProductTraceForm from "@/components/ProductTraceForm";
 
-export default function outboundPage() {
+export default function OutboundPage() {
   return <ProductTraceForm />;
 }

@@ -15,7 +15,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        {" "}
         <div className="min-h-screen flex flex-col bg-white">
           {/* 헤더 */}
           <header className="bg-white shadow p-4">

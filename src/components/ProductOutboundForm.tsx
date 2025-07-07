@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+// import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 interface ScannedProduct {
   id: string;
@@ -13,6 +14,9 @@ interface ScannedProduct {
 }
 
 export default function ProductOutboundForm() {
+  // 인증된 사용자만 접근 할 수 있는 가드 설정
+  // useAuthGuard();
+
   const today = new Date().toISOString().split("T")[0];
 
   const [barcode, setBarcode] = useState("");

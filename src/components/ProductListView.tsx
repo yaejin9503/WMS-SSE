@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+// import { useAuthGuard } from "@/hooks/useAuthGuard";
 import React, { useEffect, useState } from "react";
 
 interface ProductItem {
@@ -16,6 +17,9 @@ interface ProductItem {
 type SortKey = keyof ProductItem;
 
 export default function ProductListView() {
+  // 인증된 사용자만 접근 할 수 있는 가드 설정
+  // useAuthGuard();
+
   const [allChecked, setAllChecked] = useState(false);
   const [products, setProducts] = useState<ProductItem[]>([]);
   const [showConfirmed, setShowConfirmed] = useState(false);
