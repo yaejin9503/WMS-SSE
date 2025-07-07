@@ -41,6 +41,12 @@ export default function LoginPage() {
           className="w-full border px-3 py-2 rounded mb-4"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleLogin();
+            }
+          }}
         />
         <button
           className="w-full bg-blue-500 text-white py-2 rounded cursor-pointer hover:bg-blue-600"
