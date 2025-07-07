@@ -18,7 +18,7 @@ type SortKey = keyof ProductItem;
 export default function ProductListView() {
   const [allChecked, setAllChecked] = useState(false);
   const [products, setProducts] = useState<ProductItem[]>([]);
-  const [showConfirmed, setShowConfirmed] = useState(true);
+  const [showConfirmed, setShowConfirmed] = useState(false);
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortAsc, setSortAsc] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -177,7 +177,10 @@ export default function ProductListView() {
 
         <div className="flex justify-center mb-4 text-sm">
           <button
-            onClick={() => setShowConfirmed(true)}
+            onClick={() => {
+              setShowConfirmed(true);
+              setAllChecked(true);
+            }}
             className={`px-3 py-1 rounded-l-lg ${
               showConfirmed
                 ? "bg-blue-500 text-white"
@@ -187,7 +190,10 @@ export default function ProductListView() {
             출고 확정 리스트
           </button>
           <button
-            onClick={() => setShowConfirmed(false)}
+            onClick={() => {
+              setShowConfirmed(false);
+              setAllChecked(false);
+            }}
             className={`px-3 py-1 rounded-r-lg ${
               !showConfirmed
                 ? "bg-blue-500 text-white"
