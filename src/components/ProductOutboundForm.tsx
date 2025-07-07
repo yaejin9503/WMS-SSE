@@ -41,7 +41,13 @@ export default function ProductOutboundForm() {
         const err = await resProduct.json();
         throw new Error(err.error || "제품 조회 실패");
       }
+
       const productData = await resProduct.json();
+
+      if (productData.shipmentDate) {
+        alert("이미 출고된 제품입니다.");
+        return;
+      }
 
       setScannedProducts((prev) => [
         ...prev,
@@ -53,7 +59,7 @@ export default function ProductOutboundForm() {
           supplier: productData.supplier || "미지정",
         },
       ]);
-      setQuantity(scannedProducts.length + 1); // 수량은 스캔된 제품 수로 설정
+      setQuantity(scannedProducts.length + 1);
     } catch (err: any) {
       alert(err.message);
     }

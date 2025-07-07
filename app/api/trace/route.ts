@@ -25,6 +25,8 @@ export async function GET(req: NextRequest) {
       .eq("barcode", barcode)
       .single();
 
+    console.log("조회된 데이터:", data);
+
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 404 });
     }
